@@ -152,9 +152,43 @@ async def handle_api_export_csv(request: web.Request) -> web.Response:
     return web.Response(text=output.getvalue(), headers=headers)
 
 
-def create_web_application() -> web.Application:
+async def handle_api_send_message(request: web.Request) -> web.Response:
+    """Veb boshqaruv panelidan talabaning Telegramiga to'g'ridan-to'g'ri xabar yuborish."""
+    if not is_authenticated(request):
+        return web.json_response({"error": "Avtorizatsiyadan o'tilmagan"}, status=401)
+
+    bot = request.app.get("bot")
+    if not bot:
+        return web.json_response({"success": False, "error": "Bot xizmati ulanmagan"}, status=500)
+
+    try:
+        data = await request.json()
+        user_id = int(data.get("user_id", 0))
+        message_text = str(data.get("message", "")).strip()
+    except Exception:
+        return web.json_response({"success": False, "error": "Noto'g'ri parametrlar"}, status=400)
+
+    if not user_id or not message_text:
+        return web.json_response({"success": False, "error": "Foydalanuvchi ID yoki xabar matni bo'sh"}, status=400)
+
+    formatted_msg = (
+        "📩 <b>YoshTech Ma'muriyatidan xabar:</b>\n\n"
+        f"{message_text}\n\n"
+        "<i>Savollaringiz bo'lsa, ushbu bot orqali bemalol javob yozishingiz mumkin.</i>"
+    )
+
+    try:
+        await bot.send_message(chat_id=user_id, text=formatted_msg)
+        return web.json_response({"success": True})
+    except Exception as exc:
+        return web.json_response({"success": False, "error": f"Xabar yuborilmadi: {exc}"}, status=500)
+
+
+def create_web_application(bot=None) -> web.Application:
     """aiohttp web application yaratadi va marshrutlarni (routes) ulaydi."""
     app = web.Application()
+    if bot:
+        app["bot"] = bot
 
     # Sahifalar
     app.router.add_get("/", handle_root)
@@ -168,5 +202,6 @@ def create_web_application() -> web.Application:
     app.router.add_post("/api/applications/{id}/status", handle_api_update_status)
     app.router.add_delete("/api/applications/{id}", handle_api_delete_application)
     app.router.add_get("/api/export", handle_api_export_csv)
+    app.router.add_post("/api/send-message", handle_api_send_message)
 
     return app

@@ -7,6 +7,7 @@ muloyimlik bilan yordam beradi va asosiy menyuni taqdim etadi.
 from aiogram import Router
 from aiogram.types import Message
 from config import ADMIN_IDS, is_admin
+from keyboards.admin_menu import get_user_message_action_keyboard
 from keyboards.main_menu import get_main_menu_keyboard
 
 fallback_router = Router(name="fallback_router")
@@ -26,10 +27,15 @@ async def handle_unknown_message(message: Message) -> None:
             f"🆔 <b>ID:</b> <code>{message.from_user.id}</code>\n"
             f"📝 <b>Matn:</b> {message.text or '[Fayl/Media]'}"
         )
+
         if message.bot:
             for admin_id in ADMIN_IDS:
                 try:
-                    await message.bot.send_message(chat_id=admin_id, text=admin_alert)
+                    await message.bot.send_message(
+                        chat_id=admin_id,
+                        text=admin_alert,
+                        reply_markup=get_user_message_action_keyboard(message.from_user.id),
+                    )
                 except Exception:
                     pass
 

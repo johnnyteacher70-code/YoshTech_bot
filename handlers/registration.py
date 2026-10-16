@@ -294,7 +294,7 @@ async def process_final_confirmation(callback: CallbackQuery, state: FSMContext)
                 await callback.bot.send_message(
                     chat_id=admin_id,
                     text=admin_notification,
-                    reply_markup=get_application_action_keyboard(app_id),
+                    reply_markup=get_application_action_keyboard(app_id, user_id=user_id),
                 )
             except Exception:
                 pass

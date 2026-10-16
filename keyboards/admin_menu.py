@@ -26,21 +26,49 @@ def get_admin_panel_keyboard() -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 
 
-def get_application_action_keyboard(app_id: int) -> InlineKeyboardMarkup:
-    """Yangi tushgan arizani boshqarish tugmalari."""
+def get_application_action_keyboard(app_id: int, user_id: int | None = None) -> InlineKeyboardMarkup:
+    """Yangi tushgan arizani boshqarish va talabaga xabar yozish tugmalari."""
+    rows = []
+    if user_id:
+        rows.append([
+            InlineKeyboardButton(
+                text="💬 Talabaga xabar yozish",
+                callback_data=f"admin:reply:{user_id}",
+            )
+        ])
+
+    rows.append([
+        InlineKeyboardButton(
+            text="✅ Bog'lanildi",
+            callback_data=f"admin:status:{app_id}:boglanildi",
+        ),
+        InlineKeyboardButton(
+            text="❌ Rad etish",
+            callback_data=f"admin:status:{app_id}:bekor",
+        ),
+    ])
+    return InlineKeyboardMarkup(inline_keyboard=rows)
+
+
+def get_user_message_action_keyboard(user_id: int) -> InlineKeyboardMarkup:
+    """Foydalanuvchidan xabar kelganda javob qaytarish tugmasi."""
     keyboard = [
         [
             InlineKeyboardButton(
-                text="✅ Bog'lanildi deb belgilash",
-                callback_data=f"admin:status:{app_id}:boglanildi",
-            ),
-        ],
+                text="✍️ Javob yozish",
+                callback_data=f"admin:reply:{user_id}",
+            )
+        ]
+    ]
+    return InlineKeyboardMarkup(inline_keyboard=keyboard)
+
+
+def get_cancel_reply_to_user_keyboard() -> InlineKeyboardMarkup:
+    """Talabaga xabar yozishni bekor qilish tugmasi."""
+    keyboard = [
         [
-            InlineKeyboardButton(
-                text="❌ Rad etish",
-                callback_data=f"admin:status:{app_id}:bekor",
-            ),
-        ],
+            InlineKeyboardButton(text="❌ Bekor qilish", callback_data="admin:cancel_reply"),
+        ]
     ]
     return InlineKeyboardMarkup(inline_keyboard=keyboard)
 

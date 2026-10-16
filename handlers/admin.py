@@ -22,6 +22,7 @@ from database import (
 from keyboards.admin_menu import (
     get_admin_panel_keyboard,
     get_cancel_broadcast_keyboard,
+    get_cancel_reply_to_user_keyboard,
 )
 from states.admin import AdminStates
 
@@ -234,3 +235,65 @@ async def callback_admin_close(callback: CallbackQuery) -> None:
     if callback.message:
         await callback.message.delete()
     await callback.answer("Admin panel yopildi.")
+
+
+@admin_router.callback_query(F.data.startswith("admin:reply:"))
+async def callback_start_user_reply(callback: CallbackQuery, state: FSMContext) -> None:
+    """Muayyan talabaga shaxsiy xabar yozishni boshlash."""
+    if not is_admin(callback.from_user.id):
+        await callback.answer("Ruxsat berilmagan!", show_alert=True)
+        return
+
+    user_id = int(callback.data.split("admin:reply:")[1])
+    await state.set_state(AdminStates.waiting_for_user_reply)
+    await state.update_data(target_user_id=user_id)
+
+    text = (
+        f"✍️ <b>Talabaga (ID: <code>{user_id}</code>) javob yozish:</b>\n\n"
+        "Yubormoqchi bo'lgan xabaringizni yozing. "
+        "U to'g'ridan-to'g'ri o'quvchining botiga YoshTech nomidan yetkaziladi.\n\n"
+        "<i>Bekor qilish uchun pastdagi tugmani bosing:</i>"
+    )
+
+    if callback.message:
+        await callback.message.reply(text=text, reply_markup=get_cancel_reply_to_user_keyboard())
+    await callback.answer()
+
+
+@admin_router.callback_query(F.data == "admin:cancel_reply")
+async def callback_cancel_user_reply(callback: CallbackQuery, state: FSMContext) -> None:
+    """Xabar yozishni bekor qilish."""
+    await state.clear()
+    if callback.message:
+        await callback.message.delete()
+        await callback.message.answer("Xabar yuborish bekor qilindi.")
+    await callback.answer()
+
+
+@admin_router.message(AdminStates.waiting_for_user_reply)
+async def process_user_reply_message(message: Message, state: FSMContext) -> None:
+    """Admin yozgan xabarni to'g'ridan-to'g'ri talabaga yuborish."""
+    if not is_admin(message.from_user.id if message.from_user else None):
+        return
+
+    data = await state.get_data()
+    target_user_id = data.get("target_user_id")
+    await state.clear()
+
+    if not target_user_id:
+        await message.answer("Xatolik: Qaysi foydalanuvchiga yuborish noma'lum.")
+        return
+
+    user_text = (
+        "📩 <b>YoshTech Ma'muriyatidan xabar:</b>\n\n"
+        f"{message.text or '[Fayl/Xabar]'}\n\n"
+        "<i>Savollaringiz bo'lsa, ushbu botga bemalol yozishingiz mumkin.</i>"
+    )
+
+    try:
+        if message.bot:
+            await message.bot.send_message(chat_id=target_user_id, text=user_text)
+        await message.answer(f"✅ Xabar talabaga (ID: <code>{target_user_id}</code>) muvaffaqiyatli yetkazildi!")
+    except Exception as exc:
+        await message.answer(f"❌ Xabarni yetkazishda xatolik yuz berdi: {exc}")
+

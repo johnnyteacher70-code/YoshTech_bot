@@ -42,12 +42,12 @@ logger = logging.getLogger("yoshtech_bot")
 from web import create_web_application
 
 
-async def start_web_server() -> web.AppRunner:
+async def start_web_server(bot: Bot | None = None) -> web.AppRunner:
     """Render va mahalliy foydalanish uchun Veb Admin Dashboard va HTTP serverni ishga tushiradi."""
     port_str = os.getenv("PORT")
     port = int(port_str) if port_str and port_str.isdigit() else 8080
 
-    app = create_web_application()
+    app = create_web_application(bot=bot)
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, host="0.0.0.0", port=port)
@@ -96,7 +96,7 @@ async def main() -> None:
     logger.info("Barcha routerlar Dispatcherga muvaffaqiyatli ulandi.")
 
     # Render yoki boshqa platformalar uchun Veb Admin Dashboard va HTTP serverni ishga tushirish
-    web_runner = await start_web_server()
+    web_runner = await start_web_server(bot=bot)
 
     try:
         # Eski kutilayotgan yangilanishlarni (updates) tozalash va pollingni boshlash

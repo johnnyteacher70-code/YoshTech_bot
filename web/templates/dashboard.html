@@ -819,8 +819,39 @@
         </table>
       </div>
     </div>
-
   </main>
+
+  <!-- Send Message Modal Overlay -->
+  <div id="sendMessageModal" class="login-overlay" style="display: none;">
+    <div class="login-card" style="max-width: 480px; text-align: left;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <h3 style="font-size: 1.15rem; color: #fff;">💬 Telegram orqali xabar yuborish</h3>
+        <button onclick="closeSendMessageModal()" style="background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer;">✕</button>
+      </div>
+
+      <div style="background: rgba(255,255,255,0.04); padding: 12px; border-radius: 10px; margin-bottom: 16px;">
+        <div style="font-size: 0.8rem; color: var(--text-muted);">Qabul qiluvchi:</div>
+        <div style="font-weight: 700; color: #fff; font-size: 0.95rem;" id="modalStudentName">...</div>
+        <div style="font-size: 0.75rem; color: var(--cyan);" id="modalStudentId">ID: ...</div>
+      </div>
+
+      <div style="margin-bottom: 12px;">
+        <div style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 6px;">Tezkor andozalar (shablonlar):</div>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          <button type="button" class="btn" style="padding: 6px 10px; font-size: 0.75rem; text-align: left;" onclick="setTemplate('Assalomu alaykum! YoshTech markazimizga topshirgan arizangiz ma\'qullandi. Darslarimiz tez orada boshlanadi.')">📌 Dars boshlanishi haqida</button>
+          <button type="button" class="btn" style="padding: 6px 10px; font-size: 0.75rem; text-align: left;" onclick="setTemplate('Assalomu alaykum! Sizga qo\'ng\'iroq qildik, bog\'lana olmadik. Iltimos, bo\'sh vaqtingizda bizga yozing.')">📞 Bog\'lana olmadik</button>
+          <button type="button" class="btn" style="padding: 6px 10px; font-size: 0.75rem; text-align: left;" onclick="setTemplate('Assalomu alaykum! Ertaga markazimizda bepul ochiq dars bo\'lib o\'tadi. Sizni kutamiz!')">🎓 Bepul sinov darsi</button>
+        </div>
+      </div>
+
+      <textarea id="modalMessageText" class="input-field" rows="4" style="resize: vertical; font-size: 0.88rem;" placeholder="Xabar matnini yozing..."></textarea>
+
+      <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 12px;">
+        <button class="btn" onclick="closeSendMessageModal()">Bekor qilish</button>
+        <button class="btn btn-primary" id="btnSendModalMsg" onclick="sendTelegramMessage()">Yuborish 🚀</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Toast Container -->
   <div id="toastContainer" class="toast-container"></div>
@@ -1028,7 +1059,8 @@
             <td>
               <div class="table-actions" style="justify-content: flex-end;">
                 <a href="tel:+${cleanPhone}" class="icon-btn icon-btn-call" title="Qo'ng'iroq qilish">📞</a>
-                ${app.username ? `<a href="https://t.me/${encodeURIComponent(app.username)}" target="_blank" class="icon-btn icon-btn-tg" title="Telegramda yozish">✈️</a>` : ''}
+                <button class="icon-btn icon-btn-tg" onclick="openSendMessageModal(${app.user_id}, '${escapeHtml(app.full_name)}')" title="Telegramda to'g'ridan-to'g'ri xabar yuborish">💬</button>
+                ${app.username ? `<a href="https://t.me/${encodeURIComponent(app.username)}" target="_blank" class="icon-btn icon-btn-tg" title="Telegram profilini ochish">✈️</a>` : ''}
                 <button class="icon-btn icon-btn-delete" onclick="deleteApp(${app.id})" title="O'chirish">🗑️</button>
               </div>
             </td>
@@ -1096,6 +1128,58 @@
         }
       } catch (err) {
         alert('O\'chirishda xatolik yuz berdi!');
+      }
+    }
+
+    // Send Message Modal logic
+    let currentMessageUserId = null;
+
+    function openSendMessageModal(userId, fullName) {
+      currentMessageUserId = userId;
+      document.getElementById('modalStudentName').textContent = fullName;
+      document.getElementById('modalStudentId').textContent = 'Telegram ID: ' + userId;
+      document.getElementById('modalMessageText').value = '';
+      document.getElementById('sendMessageModal').style.display = 'flex';
+      setTimeout(() => document.getElementById('modalMessageText').focus(), 100);
+    }
+
+    function closeSendMessageModal() {
+      document.getElementById('sendMessageModal').style.display = 'none';
+      currentMessageUserId = null;
+    }
+
+    function setTemplate(text) {
+      document.getElementById('modalMessageText').value = text;
+    }
+
+    async function sendTelegramMessage() {
+      const text = document.getElementById('modalMessageText').value.trim();
+      if (!text) {
+        alert('Iltimos, xabar matnini kiriting.');
+        return;
+      }
+      const btn = document.getElementById('btnSendModalMsg');
+      btn.disabled = true;
+      btn.textContent = 'Yuborilmoqda...';
+
+      try {
+        const res = await fetch('/api/send-message?token=' + encodeURIComponent(authToken), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ user_id: currentMessageUserId, message: text })
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast('Xabar talabaning Telegramiga muvaffaqiyatli yetkazildi! 🚀');
+          closeSendMessageModal();
+        } else {
+          alert('Xatolik: ' + (data.error || 'Yuborib bo\'lmadi'));
+        }
+      } catch (err) {
+        alert('Server bilan bog\'lanishda xatolik yuz berdi!');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Yuborish 🚀';
       }
     }
 
