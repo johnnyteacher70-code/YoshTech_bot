@@ -1,0 +1,1134 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YoshTech Admin — Boshqaruv Paneli</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #0b0f19;
+      --bg-card: rgba(18, 24, 38, 0.75);
+      --bg-card-hover: rgba(26, 34, 53, 0.85);
+      --border-color: rgba(255, 255, 255, 0.08);
+      --border-accent: rgba(56, 189, 248, 0.3);
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --cyan: #06b6d4;
+      --cyan-glow: rgba(6, 182, 212, 0.25);
+      --blue: #3b82f6;
+      --emerald: #10b981;
+      --emerald-bg: rgba(16, 185, 129, 0.12);
+      --amber: #f59e0b;
+      --amber-bg: rgba(245, 158, 11, 0.12);
+      --rose: #f43f5e;
+      --rose-bg: rgba(244, 63, 94, 0.12);
+      --purple: #8b5cf6;
+      --radius: 14px;
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      background-image: 
+        radial-gradient(at 10% 20%, rgba(6, 182, 212, 0.07) 0px, transparent 50%),
+        radial-gradient(at 90% 80%, rgba(139, 92, 246, 0.07) 0px, transparent 50%);
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Top Navigation */
+    header {
+      background: rgba(11, 15, 25, 0.8);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 4px 14px var(--cyan-glow);
+    }
+
+    .brand-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: #fff;
+    }
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(16, 185, 129, 0.15);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+
+    .live-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #34d399;
+      box-shadow: 0 0 8px #34d399;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.85); }
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 16px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      color: var(--text-main);
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+
+    .btn:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--border-accent);
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      border-color: transparent;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0369a1, #1d4ed8);
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.45);
+    }
+
+    .btn-danger {
+      background: var(--rose-bg);
+      border-color: rgba(244, 63, 94, 0.3);
+      color: #fb7185;
+    }
+
+    .btn-danger:hover {
+      background: rgba(244, 63, 94, 0.25);
+    }
+
+    /* Main Container */
+    main {
+      max-width: 1360px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 28px 24px 60px;
+      flex: 1;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 20px;
+      backdrop-filter: blur(10px);
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--card-accent, var(--cyan));
+      border-radius: 4px 0 0 4px;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      border-color: var(--border-accent);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
+    }
+
+    .stat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    .stat-icon {
+      font-size: 1.3rem;
+    }
+
+    .stat-value {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -1px;
+    }
+
+    .stat-subtext {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* Analytics Section */
+    .analytics-section {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    @media (max-width: 900px) {
+      .analytics-section {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 22px;
+      backdrop-filter: blur(10px);
+    }
+
+    .panel-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .course-bar-item {
+      margin-bottom: 14px;
+    }
+
+    .course-bar-header {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .bar-track {
+      width: 100%;
+      height: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: linear-gradient(90deg, var(--cyan), var(--blue));
+      transition: width 0.8s ease-in-out;
+    }
+
+    /* Filter & Controls Bar */
+    .controls-bar {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .search-wrapper {
+      position: relative;
+      flex: 1;
+      min-width: 260px;
+    }
+
+    .search-input {
+      width: 100%;
+      background: rgba(11, 15, 25, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 10px 14px 10px 38px;
+      color: #fff;
+      font-size: 0.88rem;
+      outline: none;
+      transition: var(--transition);
+    }
+
+    .search-input:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 2px var(--cyan-glow);
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 1rem;
+      pointer-events: none;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .select-dropdown {
+      background: rgba(11, 15, 25, 0.6);
+      border: 1px solid var(--border-color);
+      color: #fff;
+      padding: 9px 14px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      outline: none;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .select-dropdown:focus {
+      border-color: var(--cyan);
+    }
+
+    .status-tab {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      padding: 7px 13px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .status-tab:hover {
+      color: #fff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .status-tab.active {
+      background: rgba(6, 182, 212, 0.15);
+      border-color: var(--cyan);
+      color: #38bdf8;
+    }
+
+    /* Table Container */
+    .table-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background: rgba(15, 23, 42, 0.6);
+      padding: 14px 18px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.88rem;
+      color: var(--text-main);
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tbody tr {
+      transition: var(--transition);
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .user-cell {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #1e293b, #334155);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      color: #38bdf8;
+    }
+
+    .user-meta {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-weight: 600;
+      color: #fff;
+    }
+
+    .user-id {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .course-badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(59, 130, 246, 0.12);
+      border: 1px solid rgba(59, 130, 246, 0.25);
+      color: #60a5fa;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    /* Status Badges */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .badge-yangi {
+      background: var(--amber-bg);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
+    }
+
+    .badge-boglanildi {
+      background: var(--emerald-bg);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #34d399;
+    }
+
+    .badge-bekor {
+      background: var(--rose-bg);
+      border: 1px solid rgba(244, 63, 94, 0.3);
+      color: #f87171;
+    }
+
+    .table-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: var(--transition);
+      text-decoration: none;
+    }
+
+    .icon-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .icon-btn-call:hover {
+      color: #34d399;
+      border-color: rgba(16, 185, 129, 0.4);
+    }
+
+    .icon-btn-tg:hover {
+      color: #38bdf8;
+      border-color: rgba(56, 189, 248, 0.4);
+    }
+
+    .icon-btn-delete:hover {
+      color: #f87171;
+      border-color: rgba(244, 63, 94, 0.4);
+    }
+
+    /* Empty state */
+    .empty-state {
+      padding: 60px 20px;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 12px;
+      opacity: 0.6;
+    }
+
+    /* Login Modal */
+    .login-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(11, 15, 25, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 20px;
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+      background: #111827;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 18px;
+      padding: 36px 32px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+      text-align: center;
+    }
+
+    .login-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      margin: 16px 0 6px;
+      color: #fff;
+    }
+
+    .login-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .input-field {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 12px 16px;
+      color: #fff;
+      font-size: 0.95rem;
+      outline: none;
+      margin-bottom: 16px;
+      transition: var(--transition);
+    }
+
+    .input-field:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 2px var(--cyan-glow);
+    }
+
+    /* Toast */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      background: #1e293b;
+      border: 1px solid var(--border-accent);
+      color: #fff;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      animation: slideIn 0.3s ease forwards;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Login Modal Overlay -->
+  <div id="loginOverlay" class="login-overlay">
+    <div class="login-card">
+      <div class="brand-icon" style="margin: 0 auto; width: 48px; height: 48px; font-size: 24px;">🚀</div>
+      <h2 class="login-title">YoshTech Boshqaruv Paneli</h2>
+      <p class="login-subtitle">Davom etish uchun administrator parolini kiriting</p>
+      
+      <form id="loginForm" onsubmit="handleLogin(event)">
+        <input type="password" id="passwordInput" class="input-field" placeholder="Admin parolini kiriting..." autofocus required>
+        <div id="loginError" style="color: #fb7185; font-size: 0.82rem; margin-bottom: 12px; display: none;">Noto'g'ri parol kiritildi!</div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 12px;">Kirish 🔐</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Top Navigation Header -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">🎓</div>
+      <div>
+        <div style="display: flex; align-items: center;">
+          <span class="brand-title">YoshTech Admin</span>
+          <span class="live-badge"><span class="live-dot"></span> LIVE</span>
+        </div>
+        <div style="font-size: 0.75rem; color: var(--text-muted);" id="clockDisplay">Toshkent vaqti: ...</div>
+      </div>
+    </div>
+
+    <div class="header-actions">
+      <button class="btn" onclick="fetchDashboardData()" title="Ma'lumotlarni yangilash">
+        <span>🔄</span> Yangilash
+      </button>
+      <a href="/api/export" id="exportBtn" class="btn" title="CSV eksport">
+        <span>📥</span> Excelga yuklash
+      </a>
+      <button class="btn btn-danger" onclick="logout()" title="Chiqish">
+        <span>🚪</span> Chiqish
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Container -->
+  <main>
+
+    <!-- Top KPI Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card" style="--card-accent: var(--cyan);">
+        <div class="stat-header">
+          <span>Jami Arizalar</span>
+          <span class="stat-icon">📋</span>
+        </div>
+        <div class="stat-value" id="statTotalApps">0</div>
+        <div class="stat-subtext">Barcha tushgan buyurtmalar</div>
+      </div>
+
+      <div class="stat-card" style="--card-accent: var(--amber);">
+        <div class="stat-header">
+          <span>Bugungi Yangi</span>
+          <span class="stat-icon">⚡</span>
+        </div>
+        <div class="stat-value" id="statTodayApps" style="color: #fbbf24;">0</div>
+        <div class="stat-subtext">So'nggi 24 soat ichida</div>
+      </div>
+
+      <div class="stat-card" style="--card-accent: var(--emerald);">
+        <div class="stat-header">
+          <span>Bog'lanilgan</span>
+          <span class="stat-icon">✅</span>
+        </div>
+        <div class="stat-value" id="statContacted" style="color: #34d399;">0</div>
+        <div class="stat-subtext">Aloqa o'rnatilgan arizalar</div>
+      </div>
+
+      <div class="stat-card" style="--card-accent: var(--purple);">
+        <div class="stat-header">
+          <span>Bot A'zolari</span>
+          <span class="stat-icon">👥</span>
+        </div>
+        <div class="stat-value" id="statTotalUsers" style="color: #c084fc;">0</div>
+        <div class="stat-subtext">Botga kirgan talabalar</div>
+      </div>
+    </div>
+
+    <!-- Analytics Breakdown -->
+    <div class="analytics-section">
+      <div class="panel-card">
+        <h3 class="panel-title">🎯 Kurslar bo'yicha qiziqish darajasi</h3>
+        <div id="courseBarsContainer">
+          <div style="color: var(--text-muted); font-size: 0.85rem;">Ma'lumotlar yuklanmoqda...</div>
+        </div>
+      </div>
+
+      <div class="panel-card">
+        <h3 class="panel-title">📊 Arizalar holati</h3>
+        <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.85rem; color: #fbbf24;">🟡 Yangi arizalar:</span>
+            <span id="badgeYangiCount" style="font-weight: 700;">0 ta</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.85rem; color: #34d399;">🟢 Bog'lanilgan:</span>
+            <span id="badgeBoglanildiCount" style="font-weight: 700;">0 ta</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-size: 0.85rem; color: #f87171;">🔴 Rad etilgan:</span>
+            <span id="badgeBekorCount" style="font-weight: 700;">0 ta</span>
+          </div>
+          <div style="margin-top: 10px; padding: 12px; background: rgba(255, 255, 255, 0.03); border-radius: 8px; font-size: 0.8rem; color: var(--text-muted);">
+            💡 <i>Har qanday arizani quyidagi jadvaldan bir marta bosish orqali holatini yangilashingiz mumkin.</i>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filter & Search Controls -->
+    <div class="controls-bar">
+      <div class="search-wrapper">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" class="search-input" placeholder="Talaba ismi, telefon raqami yoki telegram..." oninput="handleSearch()">
+      </div>
+
+      <div class="filter-group">
+        <button class="status-tab active" onclick="setStatusFilter('all', this)">Barchasi</button>
+        <button class="status-tab" onclick="setStatusFilter('yangi', this)">🟡 Yangi</button>
+        <button class="status-tab" onclick="setStatusFilter('boglanildi', this)">🟢 Bog'lanildi</button>
+        <button class="status-tab" onclick="setStatusFilter('bekor', this)">🔴 Bekor</button>
+
+        <select id="courseSelectFilter" class="select-dropdown" onchange="handleCourseFilter(this.value)">
+          <option value="all">Barcha kurslar</option>
+          <option value="Frontend dasturlash">Frontend dasturlash</option>
+          <option value="Python dasturlash">Python dasturlash</option>
+          <option value="Kompyuter savodxonligi">Kompyuter savodxonligi</option>
+          <option value="Grafik dizayn">Grafik dizayn</option>
+          <option value="Robototexnika">Robototexnika</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Applications Table -->
+    <div class="table-container">
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 60px;">ID</th>
+              <th>Talaba</th>
+              <th>Telefon</th>
+              <th>O'quv kursi</th>
+              <th>Telegram</th>
+              <th>Sana</th>
+              <th>Holati</th>
+              <th style="text-align: right;">Amallar</th>
+            </tr>
+          </thead>
+          <tbody id="applicationsTableBody">
+            <tr>
+              <td colspan="8" class="empty-state">
+                <div class="empty-icon">⏳</div>
+                <div>Ma'lumotlar yuklanmoqda...</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Toast Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script>
+    // State management
+    let allApplications = [];
+    let currentStatusFilter = 'all';
+    let currentCourseFilter = 'all';
+    let currentSearchTerm = '';
+    let authToken = localStorage.getItem('yoshtech_admin_token') || '';
+
+    // Clock
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clockDisplay').textContent = 
+        'Toshkent vaqti: ' + now.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // Check Authentication
+    function checkAuth() {
+      if (authToken) {
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('exportBtn').href = '/api/export?token=' + encodeURIComponent(authToken);
+        fetchDashboardData();
+      } else {
+        document.getElementById('loginOverlay').style.display = 'flex';
+      }
+    }
+
+    async function handleLogin(e) {
+      e.preventDefault();
+      const password = document.getElementById('passwordInput').value.trim();
+      const errorDiv = document.getElementById('loginError');
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          authToken = data.token;
+          localStorage.setItem('yoshtech_admin_token', authToken);
+          document.getElementById('loginOverlay').style.display = 'none';
+          document.getElementById('exportBtn').href = '/api/export?token=' + encodeURIComponent(authToken);
+          showToast('Xush kelibsiz! Tizimga muvaffaqiyatli kirdingiz.');
+          fetchDashboardData();
+        } else {
+          errorDiv.style.display = 'block';
+        }
+      } catch (err) {
+        errorDiv.textContent = 'Server bilan bog\'lanishda xatolik yuz berdi.';
+        errorDiv.style.display = 'block';
+      }
+    }
+
+    function logout() {
+      if (confirm('Boshqaruv panelidan chiqishni xohlaysizmi?')) {
+        localStorage.removeItem('yoshtech_admin_token');
+        authToken = '';
+        document.getElementById('loginOverlay').style.display = 'flex';
+        document.getElementById('passwordInput').value = '';
+      }
+    }
+
+    // Fetch live dashboard data
+    async function fetchDashboardData() {
+      if (!authToken) return;
+
+      try {
+        // Fetch stats
+        const statsRes = await fetch('/api/stats?token=' + encodeURIComponent(authToken));
+        if (statsRes.status === 401) { logout(); return; }
+        const stats = await statsRes.json();
+
+        renderStats(stats);
+
+        // Fetch applications
+        const appsRes = await fetch('/api/applications?token=' + encodeURIComponent(authToken));
+        allApplications = await appsRes.json();
+
+        renderTable();
+      } catch (err) {
+        console.error('Data fetch error:', err);
+      }
+    }
+
+    function renderStats(stats) {
+      document.getElementById('statTotalUsers').textContent = stats.total_users || 0;
+      document.getElementById('statTotalApps').textContent = stats.total_applications || 0;
+      document.getElementById('statTodayApps').textContent = stats.today_applications || 0;
+
+      const statusStats = stats.status_stats || {};
+      const boglanildi = statusStats['boglanildi'] || 0;
+      const yangi = statusStats['yangi'] || 0;
+      const bekor = statusStats['bekor'] || 0;
+
+      document.getElementById('statContacted').textContent = boglanildi;
+      document.getElementById('badgeYangiCount').textContent = yangi + ' ta';
+      document.getElementById('badgeBoglanildiCount').textContent = boglanildi + ' ta';
+      document.getElementById('badgeBekorCount').textContent = bekor + ' ta';
+
+      // Render Course Progress Bars
+      const container = document.getElementById('courseBarsContainer');
+      const courses = stats.courses_stats || [];
+      const total = stats.total_applications || 1;
+
+      if (!courses.length) {
+        container.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem;">Hozircha kurslar bo\'yicha arizalar yo\'q.</div>';
+        return;
+      }
+
+      let html = '';
+      courses.forEach(([name, count]) => {
+        const pct = Math.round((count / total) * 100);
+        html += `
+          <div class="course-bar-item">
+            <div class="course-bar-header">
+              <span>${escapeHtml(name)}</span>
+              <span style="color: #38bdf8;">${count} ta (${pct}%)</span>
+            </div>
+            <div class="bar-track">
+              <div class="bar-fill" style="width: ${pct}%;"></div>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    // Filter and Render Table
+    function renderTable() {
+      const tbody = document.getElementById('applicationsTableBody');
+
+      let filtered = allApplications.filter(app => {
+        // Status filter
+        if (currentStatusFilter !== 'all' && app.status !== currentStatusFilter) return false;
+        // Course filter
+        if (currentCourseFilter !== 'all' && app.course !== currentCourseFilter) return false;
+        // Search term
+        if (currentSearchTerm) {
+          const q = currentSearchTerm.toLowerCase();
+          const matchName = (app.full_name || '').toLowerCase().includes(q);
+          const matchPhone = (app.phone_number || '').includes(q);
+          const matchUsername = (app.username || '').toLowerCase().includes(q);
+          if (!matchName && !matchPhone && !matchUsername) return false;
+        }
+        return true;
+      });
+
+      if (!filtered.length) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="empty-state">
+              <div class="empty-icon">📂</div>
+              <div>Mos keluvchi arizalar topilmadi.</div>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      let rows = '';
+      filtered.forEach(app => {
+        const initials = (app.full_name || 'U').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
+        const usernameDisplay = app.username 
+          ? `<a href="https://t.me/${encodeURIComponent(app.username)}" target="_blank" style="color: #38bdf8; text-decoration: none;">@${escapeHtml(app.username)}</a>` 
+          : `<span style="color: var(--text-muted);">-</span>`;
+
+        // Clean phone for tel: link
+        const cleanPhone = (app.phone_number || '').replace(/\D/g, '');
+
+        rows += `
+          <tr>
+            <td style="font-weight: 700; color: var(--text-muted);">#${app.id}</td>
+            <td>
+              <div class="user-cell">
+                <div class="avatar">${initials}</div>
+                <div class="user-meta">
+                  <span class="user-name">${escapeHtml(app.full_name)}</span>
+                  <span class="user-id">ID: ${app.user_id}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span style="font-weight: 600; font-family: monospace;">${escapeHtml(app.phone_number)}</span>
+            </td>
+            <td>
+              <span class="course-badge">${escapeHtml(app.course)}</span>
+            </td>
+            <td>${usernameDisplay}</td>
+            <td style="font-size: 0.8rem; color: var(--text-muted);">${escapeHtml(app.created_at)}</td>
+            <td>
+              <select class="select-dropdown" style="padding: 5px 8px; font-size: 0.78rem;" onchange="updateStatus(${app.id}, this.value)">
+                <option value="yangi" ${app.status === 'yangi' ? 'selected' : ''}>🟡 Yangi</option>
+                <option value="boglanildi" ${app.status === 'boglanildi' ? 'selected' : ''}>🟢 Bog'lanildi</option>
+                <option value="bekor" ${app.status === 'bekor' ? 'selected' : ''}>🔴 Bekor</option>
+              </select>
+            </td>
+            <td>
+              <div class="table-actions" style="justify-content: flex-end;">
+                <a href="tel:+${cleanPhone}" class="icon-btn icon-btn-call" title="Qo'ng'iroq qilish">📞</a>
+                ${app.username ? `<a href="https://t.me/${encodeURIComponent(app.username)}" target="_blank" class="icon-btn icon-btn-tg" title="Telegramda yozish">✈️</a>` : ''}
+                <button class="icon-btn icon-btn-delete" onclick="deleteApp(${app.id})" title="O'chirish">🗑️</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = rows;
+    }
+
+    // Handlers
+    function setStatusFilter(status, btn) {
+      currentStatusFilter = status;
+      document.querySelectorAll('.status-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      renderTable();
+    }
+
+    function handleCourseFilter(course) {
+      currentCourseFilter = course;
+      renderTable();
+    }
+
+    function handleSearch() {
+      currentSearchTerm = document.getElementById('searchInput').value.trim();
+      renderTable();
+    }
+
+    // Update status API
+    async function updateStatus(appId, newStatus) {
+      try {
+        const res = await fetch(`/api/applications/${appId}/status?token=${encodeURIComponent(authToken)}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: newStatus })
+        });
+        const data = await res.json();
+        if (data.success) {
+          const item = allApplications.find(a => a.id === appId);
+          if (item) item.status = newStatus;
+          showToast(`Ariza #${appId} holati yangilandi!`);
+          fetchDashboardData();
+        } else {
+          alert('Xatolik yuz berdi!');
+        }
+      } catch (err) {
+        alert('Server bilan bog\'lanishda xato!');
+      }
+    }
+
+    // Delete application API
+    async function deleteApp(appId) {
+      if (!confirm(`Haqiqatan ham #${appId} raqamli arizani o'chirmoqchimisiz?`)) return;
+
+      try {
+        const res = await fetch(`/api/applications/${appId}?token=${encodeURIComponent(authToken)}`, {
+          method: 'DELETE'
+        });
+        const data = await res.json();
+        if (data.success) {
+          allApplications = allApplications.filter(a => a.id !== appId);
+          renderTable();
+          showToast(`Ariza #${appId} o'chirildi!`);
+          fetchDashboardData();
+        }
+      } catch (err) {
+        alert('O\'chirishda xatolik yuz berdi!');
+      }
+    }
+
+    // Toast
+    function showToast(message) {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      toast.className = 'toast';
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
+    // Utility: XSS prevention
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    // Auto-refresh every 12 seconds
+    setInterval(fetchDashboardData, 12000);
+
+    // Initial check
+    checkAuth();
+  </script>
+</body>
+</html>

@@ -145,3 +145,15 @@ class TestConfigAndArchitecture:
 
         # 7 ta router muvaffaqiyatli ulandi
         assert len(dp.sub_routers) == 7
+
+    def test_web_app_initialization(self):
+        """Veb boshqaruv paneli marshrutlari (routes) to'g'ri sozlangan bo'lishi kerak."""
+        from web import create_web_application
+        app = create_web_application()
+        routes = [route.resource.canonical for route in app.router.routes() if route.resource]
+        assert "/admin" in routes
+        assert "/health" in routes
+        assert "/api/login" in routes
+        assert "/api/stats" in routes
+        assert "/api/applications" in routes
+        assert "/api/export" in routes

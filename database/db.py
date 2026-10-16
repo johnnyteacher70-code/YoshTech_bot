@@ -102,11 +102,21 @@ async def get_statistics() -> Dict[str, Any]:
         """) as cursor:
             courses_stats = await cursor.fetchall()
 
+        # Statuslar bo'yicha taqsimot
+        async with db.execute("""
+            SELECT status, COUNT(*) as cnt
+            FROM applications
+            GROUP BY status
+        """) as cursor:
+            raw_statuses = await cursor.fetchall()
+            status_stats = {s: c for s, c in raw_statuses}
+
     return {
         "total_users": total_users,
         "total_applications": total_apps,
         "today_applications": today_apps,
         "courses_stats": courses_stats,
+        "status_stats": status_stats,
     }
 
 
@@ -155,3 +165,11 @@ async def update_application_status(app_id: int, status: str) -> bool:
         """, (status, app_id))
         await db.commit()
         return True
+
+
+async def delete_application(app_id: int) -> bool:
+    """Arizani bazadan o'chiradi."""
+    async with aiosqlite.connect(DB_PATH) as db:
+        cursor = await db.execute("DELETE FROM applications WHERE id = ?", (app_id,))
+        await db.commit()
+        return (cursor.rowcount or 0) > 0

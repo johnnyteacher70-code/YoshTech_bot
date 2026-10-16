@@ -41,6 +41,9 @@ def _load_admin_ids() -> list[int]:
 
 ADMIN_IDS: list[int] = _load_admin_ids()
 
+# Veb boshqaruv paneli uchun administrator paroli
+ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "yoshtech2026").strip()
+
 
 def is_admin(user_id: int | None) -> bool:
     """Foydalanuvchi administrator ekanligini tekshiradi."""

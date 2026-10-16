@@ -39,34 +39,20 @@ logging.basicConfig(
 logger = logging.getLogger("yoshtech_bot")
 
 
-async def start_health_server() -> web.AppRunner | None:
-    """Render kabi bulutli platformalar uchun engil HTTP health server ishga tushiradi.
-    
-    Agar PORT muhit o'zgaruvchisi berilgan bo'lsa (Render avtomatik beradi),
-    veb-server ishga tushadi va Render botni sog'lom (Healthy) deb baholaydi.
-    """
+from web import create_web_application
+
+
+async def start_web_server() -> web.AppRunner:
+    """Render va mahalliy foydalanish uchun Veb Admin Dashboard va HTTP serverni ishga tushiradi."""
     port_str = os.getenv("PORT")
-    if not port_str:
-        return None
+    port = int(port_str) if port_str and port_str.isdigit() else 8080
 
-    try:
-        port = int(port_str)
-    except ValueError:
-        return None
-
-    app = web.Application()
-
-    async def handle_ping(request: web.Request) -> web.Response:
-        return web.Response(text="YoshTech Bot 24/7 faol rejimda!")
-
-    app.router.add_get("/", handle_ping)
-    app.router.add_get("/health", handle_ping)
-
+    app = create_web_application()
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, host="0.0.0.0", port=port)
     await site.start()
-    logger.info("Render platformasi uchun HTTP server ishga tushirildi (Port: %s).", port)
+    logger.info("Veb boshqaruv paneli (Web Admin Dashboard) faol: port %s (/admin)", port)
     return runner
 
 
@@ -109,8 +95,8 @@ async def main() -> None:
 
     logger.info("Barcha routerlar Dispatcherga muvaffaqiyatli ulandi.")
 
-    # Render yoki boshqa platformalar uchun HTTP serverni ishga tushirish (PORT bo'lsa)
-    web_runner = await start_health_server()
+    # Render yoki boshqa platformalar uchun Veb Admin Dashboard va HTTP serverni ishga tushirish
+    web_runner = await start_web_server()
 
     try:
         # Eski kutilayotgan yangilanishlarni (updates) tozalash va pollingni boshlash

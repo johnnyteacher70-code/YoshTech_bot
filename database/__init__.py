@@ -9,6 +9,7 @@ from .db import (
     get_all_applications,
     get_all_user_ids,
     update_application_status,
+    delete_application,
 )
 
 __all__ = [
@@ -20,4 +21,5 @@ __all__ = [
     "get_all_applications",
     "get_all_user_ids",
     "update_application_status",
+    "delete_application",
 ]
