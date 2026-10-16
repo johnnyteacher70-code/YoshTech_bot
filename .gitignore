@@ -23,3 +23,8 @@ env/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Databases
+*.db
+*.sqlite3
+

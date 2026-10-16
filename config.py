@@ -26,6 +26,28 @@ PLACEHOLDER_TOKENS = {
     "BOT_TOKEN_HERE",
 }
 
+# Administratorlarning Telegram ID raqamlarini yuklash
+def _load_admin_ids() -> list[int]:
+    raw_admins = os.getenv("ADMIN_IDS", "").strip()
+    if not raw_admins:
+        return []
+    ids = []
+    for part in raw_admins.split(","):
+        clean_part = part.strip()
+        if clean_part.isdigit():
+            ids.append(int(clean_part))
+    return ids
+
+
+ADMIN_IDS: list[int] = _load_admin_ids()
+
+
+def is_admin(user_id: int | None) -> bool:
+    """Foydalanuvchi administrator ekanligini tekshiradi."""
+    if not user_id:
+        return False
+    return user_id in ADMIN_IDS
+
 
 def validate_config() -> str:
     """Bot tokenini tekshiradi va qaytaradi.

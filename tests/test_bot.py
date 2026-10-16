@@ -122,15 +122,26 @@ class TestConfigAndArchitecture:
         monkeypatch.setattr("config.BOT_TOKEN", dummy_token)
         assert validate_config() == dummy_token
 
+    def test_admin_check(self, monkeypatch):
+        """Administrator huquqi tekshiruvi to'g'ri ishlashi kerak."""
+        from config import is_admin
+        monkeypatch.setattr("config.ADMIN_IDS", [1899499264, 999999999])
+        assert is_admin(1899499264) is True
+        assert is_admin(999999999) is True
+        assert is_admin(123456789) is False
+        assert is_admin(None) is False
+
     def test_dispatcher_and_routers_integrity(self):
         """Barcha routerlar dispatcherga xatosiz ulanishi va circular import bo'lmasligi kerak."""
+        from handlers import admin_router
         dp = Dispatcher(storage=MemoryStorage())
         dp.include_router(start_router)
         dp.include_router(courses_router)
         dp.include_router(registration_router)
         dp.include_router(about_router)
         dp.include_router(contact_router)
+        dp.include_router(admin_router)
         dp.include_router(fallback_router)
 
-        # 6 ta router muvaffaqiyatli ulandi
-        assert len(dp.sub_routers) == 6
+        # 7 ta router muvaffaqiyatli ulandi
+        assert len(dp.sub_routers) == 7

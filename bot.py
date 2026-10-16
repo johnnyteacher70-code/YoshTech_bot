@@ -14,8 +14,10 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
 from config import validate_config
+from database import init_db
 from handlers import (
     about_router,
+    admin_router,
     contact_router,
     courses_router,
     fallback_router,
@@ -90,12 +92,18 @@ async def main() -> None:
     storage = MemoryStorage()
     dp = Dispatcher(storage=storage)
 
+    # Ma'lumotlar bazasini initsializatsiya qilish
+    logger.info("Ma'lumotlar bazasi tekshirilmoqda...")
+    await init_db()
+
     # Barcha routerlarni tartib bilan ulash
     dp.include_router(start_router)
     dp.include_router(courses_router)
     dp.include_router(registration_router)
     dp.include_router(about_router)
     dp.include_router(contact_router)
+    # Administrator paneli
+    dp.include_router(admin_router)
     # fallback_router eng oxirida ulanishi shart (noma'lum xabarlar uchun)
     dp.include_router(fallback_router)
 

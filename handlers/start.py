@@ -7,6 +7,7 @@ from aiogram import Router
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
 from aiogram.types import Message
+from database import upsert_user
 from keyboards.main_menu import get_main_menu_keyboard
 
 start_router = Router(name="start_router")
@@ -16,6 +17,14 @@ start_router = Router(name="start_router")
 async def handle_start(message: Message, state: FSMContext) -> None:
     """/start komandasi: Yangi foydalanuvchini samimiy kutib oladi va asosiy menyuni ko'rsatadi."""
     await state.clear()
+
+    # Foydalanuvchini ma'lumotlar bazasiga saqlaymiz
+    if message.from_user:
+        await upsert_user(
+            user_id=message.from_user.id,
+            username=message.from_user.username,
+            full_name=message.from_user.full_name or message.from_user.first_name,
+        )
 
     user_name = message.from_user.first_name if message.from_user else "Foydalanuvchi"
 

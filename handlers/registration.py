@@ -247,16 +247,61 @@ async def show_confirmation_summary(message: Message, state: FSMContext) -> None
     )
 
 
+from datetime import datetime
+from config import ADMIN_IDS
+from database import add_application
+from keyboards.admin_menu import get_application_action_keyboard
+
+
 @registration_router.callback_query(RegistrationStates.confirmation, F.data == "confirm_registration")
 async def process_final_confirmation(callback: CallbackQuery, state: FSMContext) -> None:
-    """Arizani yakuniy tasdiqlash (demo rejimida)."""
+    """Arizani yakuniy tasdiqlash: bazaga saqlash va adminga bildirishnoma yuborish."""
+    data = await state.get_data()
+    full_name = data.get("full_name", "Noma'lum")
+    phone = data.get("phone_number", "Noma'lum")
+    course = data.get("selected_course", "Noma'lum")
+    user_id = callback.from_user.id
+    username = callback.from_user.username
+
     # FSM ma'lumotlarini tozalaymiz
     await state.clear()
 
+    # Bazaga arizani saqlaymiz
+    app_id = await add_application(
+        user_id=user_id,
+        username=username,
+        full_name=full_name,
+        phone_number=phone,
+        course=course,
+    )
+
+    # Barcha administratorlarga bildirishnoma yuborish
+    now_str = datetime.now().strftime("%d.%m.%Y %H:%M")
+    username_display = f"@{username}" if username else "Mavjud emas"
+
+    admin_notification = (
+        f"🔔 <b>YANGI ARIZA KELIB TUSHDI!</b> (#{app_id})\n\n"
+        f"👤 <b>Talaba:</b> {full_name}\n"
+        f"📞 <b>Telefon:</b> <code>{phone}</code>\n"
+        f"🎯 <b>Tanlangan kurs:</b> {course}\n"
+        f"✈️ <b>Telegram:</b> {username_display} (ID: <code>{user_id}</code>)\n"
+        f"📅 <b>Sana:</b> {now_str}"
+    )
+
+    if callback.bot:
+        for admin_id in ADMIN_IDS:
+            try:
+                await callback.bot.send_message(
+                    chat_id=admin_id,
+                    text=admin_notification,
+                    reply_markup=get_application_action_keyboard(app_id),
+                )
+            except Exception:
+                pass
+
     success_text = (
-        "🎉 <b>Arizangiz demo rejimida qabul qilindi!</b>\n\n"
-        "Rahmat! Bu namuna bot bo'lgani uchun ma'lumotlaringiz bazaga saqlanmaydi "
-        "va hech kim siz bilan bog'lanmaydi.\n\n"
+        "🎉 <b>Arizangiz muvaffaqiyatli qabul qilindi!</b>\n\n"
+        "Rahmat! Tez orada o'quv markazimiz mutaxassislari siz bilan bog'lanishadi.\n\n"
         "YoshTech bilan zamonaviy kasblarni o'rganishda sizga omad tilaymiz!"
     )
 
@@ -267,4 +312,4 @@ async def process_final_confirmation(callback: CallbackQuery, state: FSMContext)
             reply_markup=get_main_menu_keyboard(),
         )
 
-    await callback.answer("Arizangiz qabul qilindi (demo)!")
+    await callback.answer("Arizangiz qabul qilindi!")
