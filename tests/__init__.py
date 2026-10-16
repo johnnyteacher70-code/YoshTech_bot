@@ -1,0 +1,1 @@
+"""YoshTech bot testlar paketi."""
