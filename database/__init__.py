@@ -2,6 +2,8 @@
 
 from .db import (
     init_db,
+    close_db,
+    is_postgres_configured,
     upsert_user,
     add_application,
     get_statistics,
@@ -14,6 +16,8 @@ from .db import (
 
 __all__ = [
     "init_db",
+    "close_db",
+    "is_postgres_configured",
     "upsert_user",
     "add_application",
     "get_statistics",

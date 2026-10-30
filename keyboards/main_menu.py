@@ -21,6 +21,9 @@ def get_main_menu_keyboard() -> ReplyKeyboardMarkup:
             KeyboardButton(text="📝 Kursga yozilish"),
         ],
         [
+            KeyboardButton(text="🤖 YoshTech AI"),
+        ],
+        [
             KeyboardButton(text="🏫 Markaz haqida"),
             KeyboardButton(text="📞 Aloqa"),
         ],

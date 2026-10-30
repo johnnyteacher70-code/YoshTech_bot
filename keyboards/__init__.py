@@ -1,6 +1,7 @@
 """YoshTech bot klaviaturalari to'plami."""
 
 from .main_menu import get_main_menu_keyboard
+from .ai_menu import get_ai_chat_keyboard
 from .course_menu import (
     get_courses_inline_keyboard,
     get_course_details_keyboard,
@@ -12,6 +13,7 @@ from .course_menu import (
 
 __all__ = [
     "get_main_menu_keyboard",
+    "get_ai_chat_keyboard",
     "get_courses_inline_keyboard",
     "get_course_details_keyboard",
     "get_course_selection_keyboard",

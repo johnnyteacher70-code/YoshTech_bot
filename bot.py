@@ -14,10 +14,11 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 
 from config import validate_config
-from database import init_db
+from database import close_db, init_db
 from handlers import (
     about_router,
     admin_router,
+    ai_router,
     contact_router,
     courses_router,
     fallback_router,
@@ -86,6 +87,7 @@ async def main() -> None:
     dp.include_router(start_router)
     dp.include_router(courses_router)
     dp.include_router(registration_router)
+    dp.include_router(ai_router)
     dp.include_router(about_router)
     dp.include_router(contact_router)
     # Administrator paneli
@@ -109,6 +111,8 @@ async def main() -> None:
         if web_runner:
             logger.info("HTTP health server to'xtatilmoqda...")
             await web_runner.cleanup()
+        logger.info("Ma'lumotlar bazasi sessiyalari yopilmoqda...")
+        await close_db()
         logger.info("Bot sessiyasi yopilmoqda...")
         await bot.session.close()
         logger.info("Bot muvaffaqiyatli to'xtatildi.")

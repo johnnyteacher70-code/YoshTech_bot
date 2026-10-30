@@ -2,5 +2,6 @@
 
 from .registration import RegistrationStates
 from .admin import AdminStates
+from .ai import AIStates
 
-__all__ = ["RegistrationStates", "AdminStates"]
+__all__ = ["RegistrationStates", "AdminStates", "AIStates"]

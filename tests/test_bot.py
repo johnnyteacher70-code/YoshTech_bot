@@ -19,6 +19,7 @@ from aiogram.fsm.storage.memory import MemoryStorage
 from config import validate_config
 from handlers import (
     about_router,
+    ai_router,
     contact_router,
     courses_router,
     fallback_router,
@@ -26,6 +27,7 @@ from handlers import (
     start_router,
 )
 from utils.validators import validate_and_normalize_phone, validate_full_name
+from utils.ai_service import ask_gemini, split_text_for_telegram
 
 
 class TestNameValidation:
@@ -138,13 +140,14 @@ class TestConfigAndArchitecture:
         dp.include_router(start_router)
         dp.include_router(courses_router)
         dp.include_router(registration_router)
+        dp.include_router(ai_router)
         dp.include_router(about_router)
         dp.include_router(contact_router)
         dp.include_router(admin_router)
         dp.include_router(fallback_router)
 
-        # 7 ta router muvaffaqiyatli ulandi
-        assert len(dp.sub_routers) == 7
+        # 8 ta router muvaffaqiyatli ulandi
+        assert len(dp.sub_routers) == 8
 
     def test_web_app_initialization(self):
         """Veb boshqaruv paneli marshrutlari (routes) to'g'ri sozlangan bo'lishi kerak."""
@@ -157,3 +160,31 @@ class TestConfigAndArchitecture:
         assert "/api/stats" in routes
         assert "/api/applications" in routes
         assert "/api/export" in routes
+
+
+class TestAIService:
+    """Gemini AI integratsiyasi testlari."""
+
+    def test_split_text_short(self):
+        """Qisqa matn bo'linmasdan bir dona element qaytarishi kerak."""
+        text = "Salom, bu qisqa xabar."
+        chunks = split_text_for_telegram(text, max_chunk_size=100)
+        assert chunks == [text]
+
+    def test_split_text_long(self):
+        """Uzun matn belgilangan hajm bo'yicha to'g'ri bo'linishi kerak."""
+        text = "Qator 1\n" * 50
+        chunks = split_text_for_telegram(text, max_chunk_size=100)
+        assert len(chunks) > 1
+        for chunk in chunks:
+            assert len(chunk) <= 100
+
+    def test_ask_gemini_without_api_key(self, monkeypatch):
+        """API key bo'lmaganda tushunarli ogohlantirish qaytarishi kerak."""
+        async def _test():
+            monkeypatch.setattr("utils.ai_service.GEMINI_API_KEY", "")
+            response = await ask_gemini("Python nima?")
+            assert "Gemini AI API kaliti topilmadi" in response
+
+        import asyncio
+        asyncio.run(_test())

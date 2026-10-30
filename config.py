@@ -44,6 +44,13 @@ ADMIN_IDS: list[int] = _load_admin_ids()
 # Veb boshqaruv paneli uchun administrator paroli
 ADMIN_PASSWORD: str = os.getenv("ADMIN_PASSWORD", "yoshtech2026").strip()
 
+# PostgreSQL / Supabase ma'lumotlar bazasi URL manzili (ixtiyoriy, berilmasa SQLite ishlatiladi)
+DATABASE_URL: str = os.getenv("DATABASE_URL", "").strip()
+
+# Google Gemini AI sozlamalari
+GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "").strip()
+GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-3.5-flash").strip()
+
 
 def is_admin(user_id: int | None) -> bool:
     """Foydalanuvchi administrator ekanligini tekshiradi."""

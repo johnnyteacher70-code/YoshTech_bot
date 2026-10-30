@@ -2,6 +2,7 @@
 
 from .admin import admin_router
 from .about import about_router
+from .ai import ai_router
 from .contact import contact_router
 from .courses import courses_router
 from .fallback import fallback_router
@@ -13,6 +14,7 @@ __all__ = [
     "start_router",
     "courses_router",
     "registration_router",
+    "ai_router",
     "about_router",
     "contact_router",
     "fallback_router",
