@@ -50,6 +50,7 @@ async def handle_help(message: Message) -> None:
         "📌 <b>Asosiy buyruqlar:</b>\n"
         "• /start - Botni qayta ishga tushirish va asosiy menyu\n"
         "• /ai [savol] - AI assistentga to'g'ridan-to'g'ri savol berish\n"
+        "• /rasm [tavsif] - AI orqali yuqori sifatli rasm chizish\n"
         "• /help - Bot imkoniyatlari haqida yordam\n"
         "• /menu - Asosiy menyuni ko'rsatish\n"
         "• /cancel - Jarayonni bekor qilish\n\n"

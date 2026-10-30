@@ -188,3 +188,11 @@ class TestAIService:
 
         import asyncio
         asyncio.run(_test())
+
+    def test_image_request_detection(self):
+        """Rasm so'rovlarini to'g'ri aniqlash testi."""
+        from utils.image_service import is_image_request
+        assert is_image_request("Menga yoqimli mushuk rasmini chiz") is True
+        assert is_image_request("Toshkent kelajakda suratini chizib ber") is True
+        assert is_image_request("Please generate image of sunset") is True
+        assert is_image_request("Python kurslari haqida ma'lumot bering") is False
