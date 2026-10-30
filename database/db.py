@@ -24,11 +24,12 @@ logger = logging.getLogger("yoshtech_bot.database")
 DB_PATH = Path(__file__).resolve().parent.parent / "yoshtech.db"
 
 _pg_pool: Optional[Any] = None
+_postgres_active: bool = False
 
 
 def is_postgres_configured() -> bool:
-    """PostgreSQL URL sozlanganligi va asyncpg mavjudligini tekshiradi."""
-    return bool(DATABASE_URL and DATABASE_URL.strip() and asyncpg is not None)
+    """PostgreSQL faol sozlanganligi va muvaffaqiyatli ulanganini tekshiradi."""
+    return bool(_postgres_active and _pg_pool is not None)
 
 
 def _prepare_pg_dsn_and_ssl(raw_url: str) -> tuple[str, dict[str, Any]]:
@@ -37,11 +38,25 @@ def _prepare_pg_dsn_and_ssl(raw_url: str) -> tuple[str, dict[str, Any]]:
     if url.startswith("postgres://"):
         url = "postgresql://" + url[len("postgres://"):]
 
-    parsed = urllib.parse.urlparse(url)
+    # Agar foydalanuvchi [parol] yoki [user] ko'rinishida to'rtburchak qavslar qo'ygan bo'lsa,
+    # urllib.parse uni noto'g'ri IPv6 host deb o'ylamasligi uchun tozalaymiz
+    if "@" in url:
+        auth_part, sep, host_part = url.rpartition("@")
+        if "://" in auth_part:
+            scheme_part, credentials = auth_part.split("://", 1)
+            clean_credentials = credentials.replace("[", "").replace("]", "")
+            url = f"{scheme_part}://{clean_credentials}@{host_part}"
+
+    try:
+        parsed = urllib.parse.urlparse(url)
+    except Exception as exc:
+        logger.warning("DATABASE_URL parse qilishda xatolik: %s", exc)
+        return url, {}
+
     query_params = urllib.parse.parse_qs(parsed.query)
 
     connect_kwargs: dict[str, Any] = {}
-    netloc_lower = parsed.netloc.lower()
+    netloc_lower = (parsed.netloc or "").lower()
 
     # Masofaviy bulutli bazalar (Supabase, Neon, Render) uchun SSL talab qilinadi
     is_cloud_db = any(domain in netloc_lower for domain in ("supabase.co", "render.com", "neon.tech", "pooler.supabase.com"))
@@ -82,28 +97,56 @@ async def get_pg_pool() -> Any:
 
 async def close_db() -> None:
     """Ma'lumotlar bazasi ulanishlarini xavfsiz yopadi."""
-    global _pg_pool
+    global _pg_pool, _postgres_active
     if _pg_pool is not None:
         logger.info("PostgreSQL ulanishlar puli yopilmoqda...")
-        await _pg_pool.close()
+        try:
+            await _pg_pool.close()
+        except Exception:
+            pass
         _pg_pool = None
+        _postgres_active = False
 
 
 async def init_db() -> None:
     """Ma'lumotlar bazasi jadvallarini yaratadi (PostgreSQL yoki SQLite)."""
-    if is_postgres_configured():
-        logger.info("Doimiy PostgreSQL ma'lumotlar bazasi jadvallari tekshirilmoqda...")
-        pool = await get_pg_pool()
-        async with pool.acquire() as conn:
-            # Foydalanuvchilar jadvali (user_id Telegram uchun BIGINT bo'lishi shart)
-            await conn.execute("""
-                CREATE TABLE IF NOT EXISTS users (
-                    user_id BIGINT PRIMARY KEY,
-                    username TEXT,
-                    full_name TEXT,
-                    created_at TEXT
-                );
-            """)
+    global _postgres_active
+    can_try_pg = bool(DATABASE_URL and DATABASE_URL.strip() and asyncpg is not None)
+
+    if can_try_pg:
+        logger.info("Doimiy PostgreSQL ma'lumotlar bazasi tekshirilmoqda...")
+        try:
+            pool = await get_pg_pool()
+            async with pool.acquire() as conn:
+                # Foydalanuvchilar jadvali (user_id Telegram uchun BIGINT bo'lishi shart)
+                await conn.execute("""
+                    CREATE TABLE IF NOT EXISTS users (
+                        user_id BIGINT PRIMARY KEY,
+                        username TEXT,
+                        full_name TEXT,
+                        created_at TEXT
+                    );
+                """)
+
+                # Arizalar jadvali
+                await conn.execute("""
+                    CREATE TABLE IF NOT EXISTS applications (
+                        id SERIAL PRIMARY KEY,
+                        user_id BIGINT,
+                        username TEXT,
+                        full_name TEXT,
+                        phone_number TEXT,
+                        course TEXT,
+                        status TEXT DEFAULT 'yangi',
+                        created_at TEXT
+                    );
+                """)
+            _postgres_active = True
+            logger.info("PostgreSQL jadvallari tayyor (users, applications).")
+            return
+        except Exception as exc:
+            _postgres_active = False
+            logger.error("PostgreSQL ulanishida xatolik (%s). Avtomatik zaxira SQLite bazasiga o'tilmoqda...", exc)
 
             # Arizalar jadvali
             await conn.execute("""
