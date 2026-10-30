@@ -89,6 +89,7 @@ async def get_pg_pool() -> Any:
             min_size=1,
             max_size=10,
             command_timeout=60,
+            statement_cache_size=0,
             **kwargs,
         )
         logger.info("PostgreSQL ulanishlar puli muvaffaqiyatli ishga tushdi.")
